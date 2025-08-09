@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 export default function App() {
-  const [atributos, setAtributos] = useState({
+  const atributosIniciais = {
     FOR: 1,
     AGI: 1,
     RES: 1,
@@ -9,13 +9,40 @@ export default function App() {
     INT: 1,
     CAR: 1,
     DET: 1,
-  });
+  };
 
+  const nomesAtributos = {
+    FOR: "Força (FOR)",
+    AGI: "Agilidade (AGI)",
+    RES: "Resistência (RES)",
+    PER: "Percepção (PER)",
+    INT: "Inteligência (INT)",
+    CAR: "Carisma (CAR)",
+    DET: "Determinação (DET)",
+  };
+
+  const [atributos, setAtributos] = useState(atributosIniciais);
   const [xp, setXp] = useState(0);
+  const [respiracao, setRespiracao] = useState("");
+
   const nivel = Math.floor(xp / 100) + 1;
+  const totalPontos = Object.values(atributos).reduce((a, b) => a + b, 0);
+  const pontosRestantes = 15 - totalPontos;
 
   const handleChangeAtributo = (key, value) => {
-    setAtributos({ ...atributos, [key]: parseInt(value) || 0 });
+    const novoValor = parseInt(value) || 1;
+
+    // Não permite mais que 5 por atributo
+    if (novoValor > 5) return;
+
+    // Calcula pontos se alterar
+    const novaDistribuicao = { ...atributos, [key]: novoValor };
+    const totalNovo = Object.values(novaDistribuicao).reduce((a, b) => a + b, 0);
+
+    // Impede passar de 15 pontos
+    if (totalNovo <= 15) {
+      setAtributos(novaDistribuicao);
+    }
   };
 
   // Cálculos automáticos
@@ -44,9 +71,10 @@ export default function App() {
         {/* Atributos */}
         <section className="bg-red-800 p-4 rounded-lg shadow-lg">
           <h2 className="text-xl font-bold mb-2">Atributos Principais</h2>
+          <p className="mb-4">Pontos restantes: <span className="font-bold">{pontosRestantes}</span></p>
           {Object.keys(atributos).map((key) => (
             <div key={key} className="flex justify-between mb-2">
-              <label>{key}</label>
+              <label>{nomesAtributos[key]}</label>
               <input
                 type="number"
                 className="w-16 p-1 text-black rounded"
@@ -67,7 +95,23 @@ export default function App() {
           <p>Iniciativa: {iniciativa}</p>
           <input className="w-full mb-2 p-2 rounded text-black" placeholder="Arma Principal" />
           <input className="w-full mb-2 p-2 rounded text-black" placeholder="Arma Secundária" />
-          <input className="w-full mb-2 p-2 rounded text-black" placeholder="Estilo de Respiração / Habilidade Oni" />
+
+          {/* Dropdown para respiração */}
+          <select
+            className="w-full mb-2 p-2 rounded text-black"
+            value={respiracao}
+            onChange={(e) => setRespiracao(e.target.value)}
+          >
+            <option value="">Selecione o Estilo de Respiração</option>
+            <option>Respiração da Água</option>
+            <option>Respiração da Chama</option>
+            <option>Respiração do Trovão</option>
+            <option>Respiração da Flor</option>
+            <option>Respiração da Pedra</option>
+            <option>Respiração da Serpente</option>
+            <option>Respiração Original</option>
+          </select>
+
           <textarea className="w-full p-2 rounded text-black" placeholder="Técnicas Especiais"></textarea>
         </section>
 
